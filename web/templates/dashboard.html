@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostWall - Cyber Defense Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glow-primary: #00ffff;
+            --glow-secondary: #ff0080;
+            --glow-warning: #ffaa00;
+            --glow-danger: #ff0040;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(15, 15, 25, 0.8);
+            --border-glow: rgba(0, 255, 255, 0.3);
+        }
+        
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--glow-primary) transparent;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+            background-attachment: fixed;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        
+        .orbitron {
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            box-shadow: 
+                0 8px 32px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: var(--glow-primary);
+            box-shadow: 
+                0 12px 40px rgba(0, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .cyber-grid {
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px var(--glow-primary); }
+            50% { box-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-primary); }
+        }
+        
+        .status-active {
+            color: var(--glow-primary);
+            text-shadow: 0 0 10px var(--glow-primary);
+        }
+        
+        .alert-high {
+            background: linear-gradient(135deg, rgba(255, 0, 64, 0.2) 0%, rgba(255, 0, 64, 0.1) 100%);
+            border-color: var(--glow-danger);
+        }
+        
+        .alert-medium {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 170, 0, 0.1) 100%);
+            border-color: var(--glow-warning);
+        }
+        
+        .alert-low {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0.1) 100%);
+            border-color: var(--glow-primary);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--glow-primary), var(--glow-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+    </style>
+</head>
+<body class="min-h-screen cyber-grid">
+    <!-- Header -->
+    <header class="relative z-10">
+        <nav class="glass-card m-4 p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-400 to-purple-600 flex items-center justify-center pulse-glow">
+                        <span class="orbitron text-xl font-bold">GW</span>
+                    </div>
+                    <div>
+                        <h1 class="orbitron text-3xl font-bold glow-text text-cyan-400">GHOSTWALL</h1>
+                        <p class="text-sm text-gray-400">Cyber Defense Matrix v0.1</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="text-center">
+                        <div id="timestamp" class="text-sm text-gray-400"></div>
+                        <div id="status" class="orbitron font-bold status-active">ACTIVE</div>
+                    </div>
+                    <div class="w-3 h-3 rounded-full bg-cyan-400 pulse-glow"></div>
+                </div>
+            </div>
+        </nav>
+    </header>    <!-- Main Dashboard -->
+    <main class="container mx-auto px-4 pb-8">
+        <!-- System Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Network Monitor -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="orbitron text-lg font-semibold text-cyan-400">NETWORK</h3>
+                    <div class="w-3 h-3 rounded-full bg-cyan-400 pulse-glow"></div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Connections</span>
+                        <span id="network-connections" class="metric-value text-xl">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Active Ports</span>
+                        <span id="network-ports" class="text-cyan-400 font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Data Flow</span>
+                        <span id="network-data" class="text-green-400 font-bold">0 MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Monitor -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="orbitron text-lg font-semibold text-purple-400">PROCESSES</h3>
+                    <div class="w-3 h-3 rounded-full bg-purple-400 pulse-glow"></div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total</span>
+                        <span id="process-total" class="metric-value text-xl">0</span>
+                    </div>                    <div class="flex justify-between">
+                        <span class="text-gray-400" title="CPU usage normalized across all cores">CPU Usage</span>
+                        <span id="process-cpu" class="text-yellow-400 font-bold">0%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Memory</span>
+                        <span id="process-memory" class="text-red-400 font-bold">0 MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Monitor -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="orbitron text-lg font-semibold text-green-400">FILES</h3>
+                    <div class="w-3 h-3 rounded-full bg-green-400 pulse-glow"></div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Events</span>
+                        <span id="file-events" class="metric-value text-xl">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Monitored</span>
+                        <span id="file-paths" class="text-green-400 font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Recent</span>
+                        <span id="file-recent" class="text-blue-400 font-bold">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Level -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="orbitron text-lg font-semibold text-orange-400">THREAT LEVEL</h3>
+                    <div id="threat-indicator" class="w-3 h-3 rounded-full bg-green-400 pulse-glow"></div>
+                </div>
+                <div class="text-center">
+                    <div id="threat-level" class="metric-value text-4xl mb-2">LOW</div>
+                    <div class="text-gray-400 text-sm">Security Status</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card p-6">
+                <h3 class="orbitron text-lg font-semibold text-cyan-400 mb-4">Network Activity</h3>
+                <div class="chart-container">
+                    <canvas id="networkChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-card p-6">
+                <h3 class="orbitron text-lg font-semibold text-purple-400 mb-4">Process Monitor</h3>
+                <div class="chart-container">
+                    <canvas id="processChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-card p-6">
+                <h3 class="orbitron text-lg font-semibold text-green-400 mb-4">File System</h3>
+                <div class="chart-container">
+                    <canvas id="fileChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Alerts -->
+            <div class="glass-card p-6">
+                <h2 class="orbitron text-xl font-bold text-red-400 mb-4">SECURITY ALERTS</h2>
+                <div id="alerts" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-gray-400 text-center py-8">No alerts detected</div>
+                </div>
+            </div>
+
+            <!-- Recent File Changes -->
+            <div class="glass-card p-6">
+                <h2 class="orbitron text-xl font-bold text-blue-400 mb-4">RECENT ACTIVITY</h2>
+                <div id="recent-activity" class="space-y-2 max-h-96 overflow-y-auto">
+                    <div class="text-gray-400 text-center py-8">No recent activity</div>
+                </div>
+            </div>
+        </div>
+    </main>    <script>
+        // WebSocket connection
+        const ws = new WebSocket('ws://' + window.location.host + '/ws');
+        
+        // Data storage for charts
+        let networkData = [];
+        let processData = [];
+        let fileData = [];
+        let timeLabels = [];
+        
+        ws.onopen = function() {
+            console.log('Connected to GhostWall monitoring system');
+        };
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            updateDashboard(data);
+        };
+
+        ws.onclose = function() {
+            console.log('Connection lost. Attempting to reconnect...');
+            setTimeout(() => location.reload(), 5000);
+        };
+
+        // Initialize charts with dark theme
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.borderColor = 'rgba(0, 255, 255, 0.1)';
+        Chart.defaults.backgroundColor = 'rgba(0, 255, 255, 0.1)';
+
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(0, 255, 255, 0.1)' },
+                    ticks: { color: '#9ca3af' }
+                },
+                y: {
+                    grid: { color: 'rgba(0, 255, 255, 0.1)' },
+                    ticks: { color: '#9ca3af' }
+                }
+            }
+        };
+
+        const networkChart = new Chart(document.getElementById('networkChart'), {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Connections',
+                    data: networkData,
+                    borderColor: '#00ffff',
+                    backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: chartOptions
+        });
+
+        const processChart = new Chart(document.getElementById('processChart'), {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'CPU Usage',
+                    data: processData,
+                    borderColor: '#a855f7',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: chartOptions
+        });
+
+        const fileChart = new Chart(document.getElementById('fileChart'), {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'File Events',
+                    data: fileData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            // Update timestamp
+            document.getElementById('timestamp').textContent = 
+                new Date(data.timestamp).toLocaleString();
+
+            // Update system status
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = data.status.toUpperCase();
+            statusEl.className = data.status === 'active' ? 'orbitron font-bold status-active' : 'orbitron font-bold text-red-400';
+
+            // Update network metrics
+            if (data.network) {
+                document.getElementById('network-connections').textContent = data.network.connections || 0;
+                document.getElementById('network-ports').textContent = data.network.activePorts || 0;
+                document.getElementById('network-data').textContent = 
+                    Math.round((data.network.bytesSent + data.network.bytesRecv) / 1024 / 1024) + ' MB';
+                
+                // Update chart
+                networkData.push(data.network.connections || 0);
+            }            // Update process metrics
+            if (data.processes) {
+                document.getElementById('process-total').textContent = data.processes.total || 0;
+                document.getElementById('process-cpu').textContent = 
+                    Math.round(data.processes.cpuUsage * 10) / 10 + '%';
+                document.getElementById('process-memory').textContent = 
+                    Math.round(data.processes.memUsage) + ' MB';
+                
+                // Update chart
+                processData.push(data.processes.cpuUsage || 0);
+            }
+
+            // Update file metrics
+            if (data.files) {
+                document.getElementById('file-events').textContent = data.files.totalEvents || 0;
+                document.getElementById('file-paths').textContent = data.files.monitoredPaths || 0;
+                document.getElementById('file-recent').textContent = 
+                    (data.files.recentChanges && data.files.recentChanges.length) || 0;
+                
+                // Update chart
+                fileData.push(data.files.totalEvents || 0);
+                
+                // Update recent activity
+                updateRecentActivity(data.files.recentChanges);
+            }
+
+            // Update time labels and limit data points
+            timeLabels.push(new Date().toLocaleTimeString());
+            if (timeLabels.length > 20) {
+                timeLabels.shift();
+                networkData.shift();
+                processData.shift();
+                fileData.shift();
+            }
+
+            // Update charts
+            networkChart.update('none');
+            processChart.update('none');
+            fileChart.update('none');
+
+            // Update threat level
+            updateThreatLevel(data);
+        }
+
+        function updateThreatLevel(data) {
+            let threatLevel = 'LOW';
+            let threatColor = 'text-green-400';
+            let indicatorColor = 'bg-green-400';
+
+            // Simple threat assessment
+            const connections = data.network?.connections || 0;
+            const cpuUsage = data.processes?.cpuUsage || 0;
+            const fileEvents = data.files?.totalEvents || 0;
+
+            if (connections > 100 || cpuUsage > 80 || fileEvents > 50) {
+                threatLevel = 'HIGH';
+                threatColor = 'text-red-400';
+                indicatorColor = 'bg-red-400';
+            } else if (connections > 50 || cpuUsage > 60 || fileEvents > 20) {
+                threatLevel = 'MEDIUM';
+                threatColor = 'text-yellow-400';
+                indicatorColor = 'bg-yellow-400';
+            }
+
+            document.getElementById('threat-level').textContent = threatLevel;
+            document.getElementById('threat-level').className = `metric-value text-4xl mb-2 ${threatColor}`;
+            document.getElementById('threat-indicator').className = `w-3 h-3 rounded-full ${indicatorColor} pulse-glow`;
+        }        function updateRecentActivity(recentChanges) {
+            const container = document.getElementById('recent-activity');
+            if (!recentChanges || recentChanges.length === 0) {
+                container.innerHTML = '<div class="text-gray-400 text-center py-8">No recent activity</div>';
+                return;
+            }
+
+            // Sort by timestamp (most recent first) and take last 15 items
+            const sortedChanges = recentChanges
+                .slice(-15)
+                .sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+
+            container.innerHTML = sortedChanges.map(fileEvent => {
+                const timestamp = fileEvent.Timestamp ? 
+                    new Date(fileEvent.Timestamp).toLocaleTimeString() : 
+                    new Date().toLocaleTimeString();
+                    
+                const fileName = fileEvent.FileName || fileEvent;
+                const operation = fileEvent.Operation || 'MODIFY';
+                
+                return `
+                    <div class="flex items-center space-x-3 p-3 rounded-lg bg-slate-800/50 border border-cyan-400/20">
+                        <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                        <div class="flex-1">
+                            <span class="text-gray-300">${fileName}</span>
+                            <span class="text-xs text-cyan-400 ml-2">${operation}</span>
+                        </div>
+                        <span class="text-xs text-gray-500">${timestamp}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fetch alerts
+        function fetchAlerts() {
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(alerts => {
+                    const alertsContainer = document.getElementById('alerts');
+                    if (!alerts || alerts.length === 0) {
+                        alertsContainer.innerHTML = '<div class="text-gray-400 text-center py-8">No alerts detected</div>';
+                        return;
+                    }
+
+                    alertsContainer.innerHTML = alerts.map(alert => `
+                        <div class="glass-card p-4 ${getAlertClass(alert.severity)}">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="orbitron font-bold ${getAlertTextColor(alert.severity)}">${alert.severity.toUpperCase()}</span>
+                                <span class="text-sm text-gray-400">${new Date(alert.time).toLocaleString()}</span>
+                            </div>
+                            <p class="text-gray-300">${alert.message}</p>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => console.error('Failed to fetch alerts:', err));
+        }
+
+        function getAlertClass(severity) {
+            switch(severity.toLowerCase()) {
+                case 'high': return 'alert-high';
+                case 'medium': return 'alert-medium';
+                case 'low': return 'alert-low';
+                default: return 'alert-low';
+            }
+        }
+
+        function getAlertTextColor(severity) {
+            switch(severity.toLowerCase()) {
+                case 'high': return 'text-red-400';
+                case 'medium': return 'text-yellow-400';
+                case 'low': return 'text-cyan-400';
+                default: return 'text-cyan-400';
+            }
+        }
+
+        // Initial data fetch and periodic updates
+        fetchAlerts();
+        setInterval(fetchAlerts, 5000);
+        
+        // Add some initial demo data to make charts visible
+        setTimeout(() => {
+            if (networkData.length === 0) {
+                for (let i = 0; i < 10; i++) {
+                    timeLabels.push(new Date(Date.now() - (10-i) * 5000).toLocaleTimeString());
+                    networkData.push(Math.floor(Math.random() * 50) + 10);
+                    processData.push(Math.floor(Math.random() * 30) + 20);
+                    fileData.push(Math.floor(Math.random() * 10));
+                }
+                networkChart.update();
+                processChart.update();
+                fileChart.update();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
