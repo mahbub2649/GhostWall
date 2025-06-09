@@ -115,6 +115,12 @@ func isSuspiciousPort(port uint32) bool {
 		22:   true, // SSH
 		23:   true, // Telnet
 		3389: true, // RDP
+		445:  true, // SMB
+		139:  true, // NetBIOS
+		3306: true, // MySQL
+		5432: true, // PostgreSQL
+		6379: true, // Redis
+		27017: true, // MongoDB
 	}
 	return suspiciousPorts[port]
 }
